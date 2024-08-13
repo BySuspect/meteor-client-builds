@@ -8,7 +8,7 @@ jobs:
         runs-on: ubuntu-latest
 
         env:
-            BUILD_VERSION: "v0.5.4"
+            BUILD_VERSION: "0.5.4"
 
         steps:
             - name: Checkout code
