@@ -37,7 +37,7 @@ jobs:
               run: |
                   git config --global user.name "GitHub Actions"
                   git config --global user.email "actions@github.com"
-                  new_tag="v${BUILD_VERSION}-build"
+                  new_tag="v${{ env.BUILD_VERSION }}-build"
                   git tag $new_tag
                   git push origin $new_tag
 
@@ -45,12 +45,12 @@ jobs:
               id: create_release
               uses: actions/create-release@v1
               with:
-                  tag_name: "${{ env.TAG_NAME }}-build"
-                  release_name: "Release ${{ env.TAG_NAME }}-build"
+                  tag_name: "v${{ env.BUILD_VERSION }}-build"
+                  release_name: "Release v${{ env.BUILD_VERSION }}-build"
                   draft: false
                   prerelease: false
               env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Burada token sağlanıyor
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Upload JAR - All JAR
               uses: actions/upload-release-asset@v1
