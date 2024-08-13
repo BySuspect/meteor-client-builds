@@ -59,6 +59,8 @@ jobs:
                   asset_path: build/libs/meteor-client-${{ env.BUILD_VERSION }}-all.jar
                   asset_name: meteor-client-${{ env.BUILD_VERSION }}-all.jar
                   asset_content_type: application/java-archive
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Upload JAR - Sources
               uses: actions/upload-release-asset@v1
@@ -67,6 +69,8 @@ jobs:
                   asset_path: build/libs/meteor-client-${{ env.BUILD_VERSION }}-sources.jar
                   asset_name: meteor-client-${{ env.BUILD_VERSION }}-sources.jar
                   asset_content_type: application/java-archive
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Upload JAR - Main
               uses: actions/upload-release-asset@v1
@@ -75,3 +79,5 @@ jobs:
                   asset_path: build/libs/meteor-client-${{ env.BUILD_VERSION }}.jar
                   asset_name: meteor-client-${{ env.BUILD_VERSION }}.jar
                   asset_content_type: application/java-archive
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
