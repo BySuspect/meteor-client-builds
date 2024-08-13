@@ -45,10 +45,12 @@ jobs:
               id: create_release
               uses: actions/create-release@v1
               with:
-                  tag_name: "v${{ env.BUILD_VERSION }}-build"
-                  release_name: "Release v${{ env.BUILD_VERSION }}-build"
+                  tag_name: "${{ env.TAG_NAME }}-build"
+                  release_name: "Release ${{ env.TAG_NAME }}-build"
                   draft: false
                   prerelease: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Burada token sağlanıyor
 
             - name: Upload JAR - All JAR
               uses: actions/upload-release-asset@v1
