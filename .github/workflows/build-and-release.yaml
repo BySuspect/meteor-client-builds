@@ -7,11 +7,14 @@ jobs:
     build:
         runs-on: ubuntu-latest
 
+        env:
+            BUILD_VERSION: "v0.5.4"
+
         steps:
-            - name: Checkout v0.5.4 code
+            - name: Checkout code
               uses: actions/checkout@v3
               with:
-                  ref: v0.5.4
+                  ref: v${{ env.BUILD_VERSION }}
 
             - name: Set up JDK 17
               uses: actions/setup-java@v3
@@ -30,45 +33,43 @@ jobs:
                   echo "Listing jar files in build/libs:"
                   ls build/libs/*.jar
 
-            - name: Get Release Upload URL
-              id: get_release
+            - name: Create new tag
               run: |
-                  response=$(curl -s -L \
-                    -H "Accept: application/vnd.github+json" \
-                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "X-GitHub-Api-Version: 2022-11-28" \
-                    https://api.github.com/repos/${{ github.repository }}/releases/tags/v0.5.4)
+                  git config --global user.name "GitHub Actions"
+                  git config --global user.email "actions@github.com"
+                  new_tag="v${BUILD_VERSION}-build"
+                  git tag $new_tag
+                  git push origin $new_tag
 
-                  upload_url=$(echo "$response" | jq -r .upload_url | sed -e "s/{?name,label}//")
-
-                  if [ -z "$upload_url" ]; then
-                    echo "Error: Failed to retrieve upload_url."
-                    echo "$response"  # Yanıtı hata ayıklama için çıktılar
-                    exit 1
-                  fi
-
-                  echo "upload_url=$upload_url" >> $GITHUB_OUTPUT
+            - name: Create GitHub Release for new tag
+              id: create_release
+              uses: actions/create-release@v1
+              with:
+                  tag_name: "v${{ env.BUILD_VERSION }}-build"
+                  release_name: "Release v${{ env.BUILD_VERSION }}-build"
+                  draft: false
+                  prerelease: false
 
             - name: Upload JAR - All JAR
               uses: actions/upload-release-asset@v1
               with:
-                  upload_url: ${{ steps.get_release.outputs.upload_url }}
-                  asset_path: build/libs/meteor-client-0.5.4-all.jar
-                  asset_name: meteor-client-0.5.4-all.jar
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: build/libs/meteor-client-${{ env.BUILD_VERSION }}-all.jar
+                  asset_name: meteor-client-${{ env.BUILD_VERSION }}-all.jar
                   asset_content_type: application/java-archive
 
             - name: Upload JAR - Sources
               uses: actions/upload-release-asset@v1
               with:
-                  upload_url: ${{ steps.get_release.outputs.upload_url }}
-                  asset_path: build/libs/meteor-client-0.5.4-sources.jar
-                  asset_name: meteor-client-0.5.4-sources.jar
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: build/libs/meteor-client-${{ env.BUILD_VERSION }}-sources.jar
+                  asset_name: meteor-client-${{ env.BUILD_VERSION }}-sources.jar
                   asset_content_type: application/java-archive
 
             - name: Upload JAR - Main
               uses: actions/upload-release-asset@v1
               with:
-                  upload_url: ${{ steps.get_release.outputs.upload_url }}
-                  asset_path: build/libs/meteor-client-0.5.4.jar
-                  asset_name: meteor-client-0.5.4.jar
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: build/libs/meteor-client-${{ env.BUILD_VERSION }}.jar
+                  asset_name: meteor-client-${{ env.BUILD_VERSION }}.jar
                   asset_content_type: application/java-archive
