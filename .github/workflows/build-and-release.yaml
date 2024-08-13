@@ -1,4 +1,4 @@
-name: Build and Update
+name: Build and Release
 
 on:
     workflow_dispatch:
@@ -23,13 +23,12 @@ jobs:
               uses: gradle/gradle-build-action@v2
 
             - name: Build the mod
-              run: |
-                  ./gradlew build || exit 1
+              run: ./gradlew build
 
             - name: List JAR files
               run: |
                   echo "Listing jar files in build/libs:"
-                  ls build/libs/*.jar || exit 1
+                  ls build/libs/*.jar
 
             - name: Get Release Upload URL
               id: get_release
@@ -38,11 +37,23 @@ jobs:
                     -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                     https://api.github.com/repos/${{ github.repository }}/releases/tags/v0.5.4 \
                     | jq -r .upload_url | sed -e "s/{?name,label}//")
-                  if [ -z "$upload_url" ]; then
-                    echo "Failed to get upload URL."
-                    exit 1
-                  fi
-                  echo "::set-output name=upload_url::$upload_url"
+                  echo "upload_url=$upload_url" >> $GITHUB_OUTPUT
+
+            - name: Upload JAR - All JAR
+              uses: actions/upload-release-asset@v1
+              with:
+                  upload_url: ${{ steps.get_release.outputs.upload_url }}
+                  asset_path: build/libs/meteor-client-0.5.4-all.jar
+                  asset_name: meteor-client-0.5.4-all.jar
+                  asset_content_type: application/java-archive
+
+            - name: Upload JAR - Sources
+              uses: actions/upload-release-asset@v1
+              with:
+                  upload_url: ${{ steps.get_release.outputs.upload_url }}
+                  asset_path: build/libs/meteor-client-0.5.4-sources.jar
+                  asset_name: meteor-client-0.5.4-sources.jar
+                  asset_content_type: application/java-archive
 
             - name: Upload JAR - Main
               uses: actions/upload-release-asset@v1
